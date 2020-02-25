@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\item;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -29,29 +30,56 @@ class HomeController extends Controller
         return view('home', [
             'items' => $items
         ]);
+        
     }
     public function addnew()
     {
-        return view('addnew');
+        if (Auth::user()){
+            return view('addnew');
+           }
+        return view('auth/login');
+        
+    }
+    public function edit(Request $request, Item $item)
+    {
+        
+        return view('edit', ['item' => $item]);
+    }
+    public function show(Request $request, Item $item)
+    {
+        
+        return view('show', ['item' => $item]);
+    }
+    public function edited(Request $request, Item $item)
+    {
+        item::whereId($request->id)->update(["number"=>$request->number,"invoice"=>$request->invoice,"supply"=>$request->supply,"description"=>$request->description]);
+        return redirect()->route('home');
     }
     public function store(Request $request)
     {
         $request->validate([
-            'Number' => 'required',
-            'Invoice' => 'required',
-            'Supply' => 'required',
-            'Description' => 'required'
+            'number' => 'required',
+            'invoice' => 'required',
+            'supply' => 'required',
+            'description' => 'required'
         ]);
         $item = new Item;
         
-        $item->Number = $request->get('Number');
-        $item->Invoice = $request->get('Invoice');
-        $item->Supply = $request->get('Supply');
-        $item->Description = $request->get('Description');
+        $item->number = $request->get('number');
+        $item->invoice = $request->get('invoice');
+        $item->supply = $request->get('supply');
+        $item->description = $request->get('description');
         
         $item->save();
 
         return redirect()->route('home');
     }
-    
+    public function destroy(Request $request, Item $item)
+    {
+        $res = Item::where('id', $item->id)->delete();
+        $items = Item::paginate(15);;
+        return view('home', [
+            'items' => $items
+        ]);
+    }
 }

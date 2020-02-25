@@ -19,7 +19,6 @@ class CreateItemsTable extends Migration
             $table->date('invoice');
             $table->date('supply');
             $table->string('description');
-            $table->timestamps();
         });
     }
 
